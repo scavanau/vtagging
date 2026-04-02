@@ -1,14 +1,10 @@
-####
-#Doesn't need to be run, just for plotting settings
-####
 #!/usr/bin/env python3
 import ROOT
 import os
-
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-def plot_basic(
+def plot_histogram(
     rootfile,
     histname,
     title="",
@@ -16,113 +12,48 @@ def plot_basic(
     ytitle="Events",
     output_name="plot",
     output_dir="plots_tagging",
+    color=ROOT.kBlack,
+    ymin=None,
+    ymax=None,
     logy=False,
 ):
-
     f = ROOT.TFile.Open(rootfile)
     h = f.Get(histname)
     if not h:
         raise RuntimeError(f"Histogram {histname} not found in {rootfile}")
-
     h = h.Clone()
     h.SetDirectory(0)
     f.Close()
 
-    # Canvas
     c = ROOT.TCanvas("c", "c", 800, 700)
-    c.SetMargin(0.12, 0.05, 0.12, 0.08)
+    c.SetMargin(0.13, 0.05, 0.12, 0.08)
     c.SetGrid()
-
     if logy:
         c.SetLogy()
 
     h.SetTitle(title)
-    h.SetLineColor(ROOT.kBlue + 1)
-    h.SetMarkerStyle(20)
-    h.SetMarkerSize(1.0)
-    h.SetMarkerColor(ROOT.kBlue + 1)
-    h.SetLineWidth(2)
-
-    h.GetXaxis().SetTitle(xtitle)
-    h.GetYaxis().SetTitle(ytitle)
-
-    h.GetXaxis().SetTitleSize(0.045)
-    h.GetYaxis().SetTitleSize(0.045)
-
-    h.GetXaxis().SetLabelSize(0.04)
-    h.GetYaxis().SetLabelSize(0.04)
-
-    h.Draw("E1")
-
-    # Output
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    c.SaveAs(os.path.join(output_dir, f"{output_name}.pdf"))
-    c.SaveAs(os.path.join(output_dir, f"{output_name}.png"))
-
-    print(f"Saved plot to {output_dir}/{output_name}.pdf")
-    
-def plot_histogram(
-    rootfile,
-    histname,
-    title="",
-    xtitle="",
-    ytitle="",
-    output_name="plot",
-    output_dir="plots_tagging",
-    ymin=None,
-    ymax=None,
-):
-    """
-    General plotting function for efficiencies and scale factors.
-    """
-    f = ROOT.TFile.Open(rootfile)
-    h = f.Get(histname)
-    if not h:
-        raise RuntimeError(f"Histogram {histname} not found in {rootfile}")
-
-    h = h.Clone()
-    h.SetDirectory(0)
-    f.Close()
-
-    # create canvas
-    c = ROOT.TCanvas("c", "c", 800, 700)
-    c.SetMargin(0.13, 0.05, 0.12, 0.08)
-    c.SetGrid()
-
-    h.SetTitle(title)
-    h.SetLineColor(ROOT.kBlack)
+    h.SetLineColor(color)
+    h.SetMarkerColor(color)
     h.SetMarkerStyle(20)
     h.SetMarkerSize(1.1)
-    h.SetMarkerColor(ROOT.kBlack)
     h.SetLineWidth(2)
 
     h.GetXaxis().SetTitle(xtitle)
     h.GetYaxis().SetTitle(ytitle)
-
     h.GetXaxis().SetTitleSize(0.045)
     h.GetYaxis().SetTitleSize(0.045)
-
     h.GetXaxis().SetLabelSize(0.04)
     h.GetYaxis().SetLabelSize(0.04)
 
-    if ymin is not None:
-        h.SetMinimum(ymin)
-    if ymax is not None:
-        h.SetMaximum(ymax)
-        
+    if ymin is not None: h.SetMinimum(ymin)
+    if ymax is not None: h.SetMaximum(ymax)
     h.Draw("E1")
 
-    # Output
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
+    os.makedirs(output_dir, exist_ok=True)
     c.SaveAs(os.path.join(output_dir, f"{output_name}.pdf"))
     c.SaveAs(os.path.join(output_dir, f"{output_name}.png"))
-
     print(f"Saved plot to {output_dir}/{output_name}.pdf")
-
+    
 def plot_eff_with_sf(
     rootfile,
     region,
@@ -233,11 +164,7 @@ def plot_eff_with_sf(
     line.SetLineStyle(2)
     line.Draw()
 
-    # Save
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
+    os.makedirs(output_dir, exist_ok=True)
     c.SaveAs(os.path.join(output_dir, f"{output_name}.pdf"))
     c.SaveAs(os.path.join(output_dir, f"{output_name}.png"))
-
     print(f"Saved plot to {output_dir}/{output_name}.pdf")
